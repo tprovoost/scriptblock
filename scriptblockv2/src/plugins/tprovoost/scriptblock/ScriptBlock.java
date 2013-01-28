@@ -38,6 +38,7 @@ public class ScriptBlock extends Plugin implements Block
 
     public ScriptBlock()
     {
+        // voila
         ScriptEngineManager factory = new ScriptEngineManager();
         for (ScriptEngineFactory f : factory.getEngineFactories())
         {
