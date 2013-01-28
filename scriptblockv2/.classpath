@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="var" path="ICY_HOME/icy.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Icy-App/plugins/adufour/blocks/Blocks.jar"/>
+	<classpathentry kind="lib" path="/Icy-App/plugins/adufour/ezplug/EzPlug.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/javascripter"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/AutoComplete"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/RSyntaxTextArea"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Jython"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -138,7 +138,6 @@ public class ScriptBlock extends Plugin implements Block
                 else if (ScriptBlock.this.inputMap.size() > 1)
                 {
                     ScriptBlock.this.inputMap.remove(var);
-                    inputMap.clear();
                 }
             }
         });
