@@ -23,19 +23,19 @@ import plugins.tprovoost.scriptblock.vartransformer.JSScriptBlock;
 import plugins.tprovoost.scriptblock.vartransformer.PythonScriptBlock;
 import plugins.tprovoost.scripteditor.scriptinghandlers.ScriptingHandler;
 
-public class ScriptBlockOS extends Plugin implements Block
+public class ScriptBlockV2 extends Plugin implements Block
 {
     ArrayList<String> languagesInstalled = new ArrayList<String>();
 
     private VarString scriptType;
-    private VarScript inputScript = new VarScript("Script", "output = input0 * 2");
+    private VarScript inputScript = new VarScript("Script", "output = a + b");
 
     private VarList inputMap;
     private VarMutable output = new VarMutable("output", Integer.class);
 
-    private int currentIdx = 0;
+    private char currentIdx = 'a';
 
-    public ScriptBlockOS()
+    public ScriptBlockV2()
     {
         ScriptEngineManager factory = new ScriptEngineManager();
         for (ScriptEngineFactory f : factory.getEngineFactories())
@@ -51,10 +51,15 @@ public class ScriptBlockOS extends Plugin implements Block
     {
         ScriptingHandler handler = inputScript.getEditor().panel.getScriptHandler();
         ScriptEngine engine = handler.createNewEngine();
+        String language = inputScript.getEditor().panel.getLanguage();
 
         for (Var<?> var : inputMap)
         {
             Object value = var.getValue();
+            if (language.contentEquals("javascript"))
+            {
+                value = JSScriptBlock.transformInputForScript(value);
+            }
             String name = var.getName();
             engine.put(name, value);
         }
@@ -68,7 +73,7 @@ public class ScriptBlockOS extends Plugin implements Block
         }
 
         Object resObject = engine.get("output");
-        String language = inputScript.getEditor().panel.getLanguage();
+
         if (language.contentEquals("javascript"))
         {
             output.setValue(JSScriptBlock.transformScriptOutput(resObject));
@@ -90,15 +95,15 @@ public class ScriptBlockOS extends Plugin implements Block
 
         if (this.inputMap == null)
             this.inputMap = inputMap;
-        int idx = currentIdx++;
+        char idx = currentIdx++;
 
         final VarMutable var;
-        if (idx == 0)
+        if (idx == 'a')
         {
             inputMap.add(inputScript);
         }
 
-        var = new VarMutable("input" + idx, Integer.class);
+        var = new VarMutable("" + (char) idx, Integer.class);
         var.addListener(new VarListener()
         {
             @Override
@@ -113,11 +118,11 @@ public class ScriptBlockOS extends Plugin implements Block
                 if (newReference != null)
                 {
                     // add a new variable recursively
-                    declareInput(ScriptBlockOS.this.inputMap);
+                    declareInput(ScriptBlockV2.this.inputMap);
                 }
-                else if (ScriptBlockOS.this.inputMap.size() > 1)
+                else if (ScriptBlockV2.this.inputMap.size() > 1)
                 {
-                    ScriptBlockOS.this.inputMap.remove(var);
+                    ScriptBlockV2.this.inputMap.remove(var);
                 }
             }
         });

@@ -23,18 +23,20 @@ import plugins.tprovoost.scriptblock.vartransformer.JSScriptBlock;
 import plugins.tprovoost.scriptblock.vartransformer.PythonScriptBlock;
 import plugins.tprovoost.scripteditor.scriptinghandlers.ScriptingHandler;
 
-public class ScriptBlock extends Plugin implements Block
+public abstract class ScriptBlock extends Plugin implements Block
 {
     ArrayList<String> languagesInstalled = new ArrayList<String>();
 
     private VarString scriptType;
-    private VarScript inputScript = new VarScript("Script", "output = input0 * 2");
+    private VarScript inputScript = new VarScript("Script", "output0 = a * 2");
 
     private VarList inputMap;
     private VarList outputMap;
 
-    private int currentIdx = 0;
+    private char currentIdxI = 'a';
     private int currentIdxO = 0;
+
+    boolean creating = false;
 
     public ScriptBlock()
     {
@@ -103,23 +105,28 @@ public class ScriptBlock extends Plugin implements Block
         // }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void declareInput(final VarList inputMap)
     {
 
         if (this.inputMap == null)
             this.inputMap = inputMap;
-        int idx = currentIdx++;
+        char idx = currentIdxI++;
 
-        final VarMutable var;
-        if (idx == 0)
+        final VarMutable createdVariable;
+        if (idx == 'a')
         {
             inputMap.add(inputScript);
         }
+        createdVariable = createVar("" + idx);
+        inputMap.add(createdVariable.getName(), createdVariable);
+    }
 
-        var = new VarMutable("input" + idx, Integer.class);
-        var.addListener(new VarListener()
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private VarMutable createVar(String name)
+    {
+        final VarMutable createdVariable = new VarMutable(name, Integer.class);
+        createdVariable.addListener(new VarListener()
         {
             @Override
             public void valueChanged(Var source, Object oldValue, Object newValue)
@@ -138,13 +145,42 @@ public class ScriptBlock extends Plugin implements Block
                 }
                 else if (ScriptBlock.this.inputMap.size() > 1)
                 {
-                    ScriptBlock.this.inputMap.remove(var);
+                    if (creating)
+                        return;
+                    else
+                        creating = true;
+
+                    // rebuild all
+                    currentIdxI = 'a';
+                    int size = inputMap.size() - 1;
+                    ArrayList<Var<?>> vars = new ArrayList<Var<?>>();
+                    for (Var<?> v : inputMap)
+                    {
+                        v.setReference(null);
+                        vars.add(v);
+                    }
+                    for (Var<?> v : vars)
+                    {
+                        inputMap.remove(v);
+                    }
+                    // inputMap.clear();
+
+                    // add items
+                    inputMap.add(inputScript);
+                    for (int i = 0; i < size - 1; ++i)
+                    {
+                        String varName = "" + (char) (currentIdxI + i);
+                        inputMap.add(varName, createVar(varName));
+                    }
+                    creating = false;
                 }
             }
         });
-        var.setDefaultEditorModel(new TypeSelectionModel(new Class<?>[] {null, Sequence.class, Integer.class,
-                Double.class, int[].class, double[].class, String.class, File.class, File[].class, Object[].class}));
-        inputMap.add(var.getName(), var);
+        createdVariable.setDefaultEditorModel(new TypeSelectionModel(new Class<?>[] {null, Sequence.class,
+                Integer.class, Double.class, int[].class, double[].class, String.class, File.class, File[].class,
+                Object[].class}));
+
+        return createdVariable;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

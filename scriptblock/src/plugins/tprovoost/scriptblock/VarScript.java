@@ -41,7 +41,7 @@ public class VarScript extends VarString
     {
         ScriptingHandler handler = getEditor().panel.getScriptHandler();
         ScriptEngine engine = handler.getEngine();
-        handler.eval(engine, getEditor().panel.getTextArea().getText());
+        handler.eval(engine, getValue());
     }
 
     public ScriptEngine getEngine()
